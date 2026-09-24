@@ -1,8 +1,8 @@
 name: planning board sync
 
-# Adds every open Epic and Spek issue in the org to the public planning board
-# (https://github.com/orgs/projectbluefin/projects/2). Membership is driven by
-# the org issue type only; set the type on the issue and the next run adds it.
+# Adds every open issue labelled `epic` or `spek` in the org to the public
+# planning board (https://github.com/orgs/projectbluefin/projects/2). Membership
+# is driven by those labels only; label the issue and the next run adds it.
 # Closing and archiving are handled by the board's built-in workflows.
 
 on:
@@ -25,7 +25,7 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
         with:
-          app-id: ${{ secrets.MERGERAPTOR_APP_ID }}
+          client-id: ${{ secrets.MERGERAPTOR_APP_ID }}
           private-key: ${{ secrets.MERGERAPTOR_PRIVATE_KEY }}
           owner: projectbluefin
 
@@ -35,7 +35,7 @@ jobs:
         run: |
           set -euo pipefail
           gh api -X GET search/issues --paginate \
-            -f q='org:projectbluefin is:issue is:open archived:false type:Epic,Spek' \
+            -f q='org:projectbluefin is:issue is:open archived:false label:epic,spek' \
             -f per_page=100 --jq '.items[].html_url' |
           while read -r url; do
             gh project item-add 2 --owner projectbluefin --url "$url" >/dev/null
